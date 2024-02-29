@@ -12,20 +12,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (element.className === 'open') {
       element.parentElement.className = 'read email';
-      // set the read field in the actual email in db to true
-      // TODO: how to get id?!?!?!?!?!?!?!?
-      // maybe try using data attributes? have the id as a data attribute on the
-      // button, and when the button is pressed get the value of the data attribute
-      // with the value of the id!
-
       // get id and do a put request to change the read to true
+      // use the data attribute for the email id that's passed down
       fetch(`/emails/${element.dataset.email_id}`, {
         method: 'PUT',
         body: JSON.stringify({
             read: true
         })
       })
-      console.log(element)
+
+      fetch(`/emails/${element.dataset.email_id}`)
+      .then(response => response.json())
+      .then(email => {
+        console.log(email)
+        document.querySelector('#email-view').innerHTML = `
+        <h1>${email.subject}</h1>
+        <h6>From: ${email.sender}</h6>
+        <h6>To: ${email.recipients}</h6>
+        <p>Sent: ${email.timestamp}</p>
+        <p>${email.body}</p>
+        `
+      });
+
+      document.querySelector('#emails-view').style.display = 'none';
+      document.querySelector('#compose-view').style.display = 'none';
+      document.querySelector('#email-view').style.display = 'block';
+
+
     }
   })
   // By default, load the inbox
@@ -37,10 +50,20 @@ if (!localStorage.getItem('sentMail')) {
   localStorage.setItem('sentMail', [])
 }
 
-function compose_email() {
+function reset_display() {
+  // reset the html to nothing for the email (so it's fresh each time on reload)
+  document.querySelector('#email-view').innerHTML = ''
 
-  // Show compose view and hide other views
+  // hide all views
   document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'none';
+}
+
+function compose_email() {
+  reset_display()
+
+  // show compose forms
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
@@ -50,22 +73,22 @@ function compose_email() {
 }
 
 function load_mailbox(mailbox) {
-  
+  reset_display()
+
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
-  document.querySelector('#compose-view').style.display = 'none';
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 
-  console.log(`provided mailbox is: ${mailbox}`)
+  // console.log(`provided mailbox is: ${mailbox}`)
   // load the appropriate mailbox
 
   // do a get request to the appropriate mailbox
   fetch(`/emails/${mailbox}`)
   .then(response => response.json()) // if doing arrow function, with return one-liner, remove curly braces!
   .then(result => {
-    console.log(result);//also looks like need to refresh browser to see results!
+    // console.log(result);//also looks like need to refresh browser to see results!
     result.forEach(add_email)
   });
 
@@ -78,7 +101,7 @@ function add_email(contents) {
   // create a new email
   const email = document.createElement('div')
   // email.innerHTML = contents.subject
-  console.log(contents.sender)
+  // console.log(contents.sender)
 
   // depending on the read/unread state, set the className to either
   // read email or
