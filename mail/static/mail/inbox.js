@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <h6>To: ${email.recipients}</h6>
           <p>Sent: ${email.timestamp}</p>
           <p>${email.body}</p>
+          <button class="reply" data-email_id=${element.dataset.email_id}>Reply</button>
           `
         } else if (mailbox === 'archive') {
           document.querySelector('#email-view').innerHTML = `
@@ -48,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <h6>To: ${email.recipients}</h6>
           <p>Sent: ${email.timestamp}</p>
           <p>${email.body}</p>
+          <button class="reply" data-email_id=${element.dataset.email_id}>Reply</button>
           `
         } else {
           document.querySelector('#email-view').innerHTML = `
@@ -56,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <h6>To: ${email.recipients}</h6>
           <p>Sent: ${email.timestamp}</p>
           <p>${email.body}</p>
+          <button class="reply" data-email_id=${element.dataset.email_id}>Reply</button>
           `
         }
       });
@@ -86,6 +89,15 @@ document.addEventListener('DOMContentLoaded', function() {
         //note: can't just put load_mailbox outside the fetch, since something about promises
         //but won't properly refresh is all I know
       }
+    } else if (element.className === 'reply') {
+      fetch(`/emails/${element.dataset.email_id}`)
+      .then(response => response.json())
+      .then(email => {
+        compose_email()
+        document.querySelector('#compose-recipients').value = email.sender;
+        document.querySelector('#compose-subject').value = email.subject.startsWith('Re:') ? `${email.subject}` : `Re: ${email.subject}`;
+        document.querySelector('#compose-body').value = `======\nOn ${email.timestamp} ${email.sender} wrote:\n\n${email.body}`;
+      })
     }
   })
   // By default, load the inbox

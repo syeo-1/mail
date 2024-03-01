@@ -2,6 +2,10 @@ textarea {
     min-height: 400px;
 }
 
+p {
+    white-space: pre-line; /*ensure newlines properly displayed for paragraph tags (ie. email body)*/
+}
+
 .email {
     padding: 20px;
     margin-bottom: 10px;
