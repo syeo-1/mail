@@ -70,7 +70,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     } else if (element.className === 'archive') {
-      // console.log(element.id)
       if (element.id === 'archive-email') {
         fetch(`/emails/${element.dataset.email_id}`, {
           method: 'PUT',
@@ -140,28 +139,18 @@ function load_mailbox(mailbox) {
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 
-  // console.log(`provided mailbox is: ${mailbox}`)
-  // load the appropriate mailbox
-
   // do a get request to the appropriate mailbox
   fetch(`/emails/${mailbox}`)
   .then(response => response.json()) // if doing arrow function, with return one-liner, remove curly braces!
   .then(result => {
-    // console.log(result);//also looks like need to refresh browser to see results!
     result.forEach(add_email.bind(null, mailbox))
   });
-  // console.log(document.querySelectorAll('button'))
-  // generate divs for the emails and return them!
-  // relevant section in lecture 6: search get new posts and add posts
 
 }
 
 function add_email(mailbox, contents) {
   // create a new email
   const email = document.createElement('div')
-  // email.innerHTML = contents.subject
-  // console.log(contents.sender)
-  // console.log(mailbox)
 
   // depending on the read/unread state, set the className to either
   // read email or
@@ -174,35 +163,10 @@ function add_email(mailbox, contents) {
   email.innerHTML = `from: ${contents.sender} 
   - ${contents.subject} | ${contents.timestamp} <button data-email_id=${contents.id} data-mailbox=${mailbox} class="open">open</button>`
 
-  // console.log(email)
-
   // add to DOM
   document.querySelector('#emails-view').append(email)
 
 }
-
-// [
-//     {
-//         "id": 100,
-//         "sender": "foo@example.com",
-//         "recipients": ["bar@example.com"],
-//         "subject": "Hello!",
-//         "body": "Hello, world!",
-//         "timestamp": "Jan 2 2020, 12:00 AM",
-//         "read": false,
-//         "archived": false
-//     },
-//     {
-//         "id": 95,
-//         "sender": "baz@example.com",
-//         "recipients": ["bar@example.com"],
-//         "subject": "Meeting Tomorrow",
-//         "body": "What time are we meeting?",
-//         "timestamp": "Jan 1 2020, 12:00 AM",
-//         "read": true,
-//         "archived": false
-//     }
-// ]
 
 function send_mail(event) {
   // prevent default stops it from submitting a form and bringing you to a new page!!!
