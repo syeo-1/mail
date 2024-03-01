@@ -15,6 +15,10 @@ textarea {
     float: right;
 }
 
+.archive {
+    float: right;
+}
+
 .unread {
     background-color: white;
 }

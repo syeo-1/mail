@@ -25,20 +25,67 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(response => response.json())
       .then(email => {
         console.log(email)
-        document.querySelector('#email-view').innerHTML = `
-        <h1>${email.subject}</h1>
-        <h6>From: ${email.sender}</h6>
-        <h6>To: ${email.recipients}</h6>
-        <p>Sent: ${email.timestamp}</p>
-        <p>${email.body}</p>
-        `
+        const mailbox = element.dataset.mailbox;
+        console.log(mailbox)
+        if (mailbox === 'inbox') {
+          document.querySelector('#email-view').innerHTML = `
+          <div>
+            <h1>${email.subject}</h1>
+            <button class="archive" id="archive-email" data-email_id=${element.dataset.email_id}>Archive</button>
+          </div>
+          <h6>From: ${email.sender}</h6>
+          <h6>To: ${email.recipients}</h6>
+          <p>Sent: ${email.timestamp}</p>
+          <p>${email.body}</p>
+          `
+        } else if (mailbox === 'archive') {
+          document.querySelector('#email-view').innerHTML = `
+          <div>
+            <h1>${email.subject}</h1>
+            <button class="archive" id="unarchive-email" data-email_id=${element.dataset.email_id}>Unarchive</button>
+          </div>
+          <h6>From: ${email.sender}</h6>
+          <h6>To: ${email.recipients}</h6>
+          <p>Sent: ${email.timestamp}</p>
+          <p>${email.body}</p>
+          `
+        } else {
+          document.querySelector('#email-view').innerHTML = `
+          <h1>${email.subject}</h1>
+          <h6>From: ${email.sender}</h6>
+          <h6>To: ${email.recipients}</h6>
+          <p>Sent: ${email.timestamp}</p>
+          <p>${email.body}</p>
+          `
+        }
       });
+
 
       document.querySelector('#emails-view').style.display = 'none';
       document.querySelector('#compose-view').style.display = 'none';
       document.querySelector('#email-view').style.display = 'block';
 
 
+    } else if (element.className === 'archive') {
+      // console.log(element.id)
+      if (element.id === 'archive-email') {
+        fetch(`/emails/${element.dataset.email_id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+              archived: true
+          })
+        }).then(() => load_mailbox('inbox'))
+      } else {
+        fetch(`/emails/${element.dataset.email_id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+              archived: false
+          })
+        }).then( () => load_mailbox('inbox')
+        )
+        //note: can't just put load_mailbox outside the fetch, since something about promises
+        //but won't properly refresh is all I know
+      }
     }
   })
   // By default, load the inbox
@@ -89,19 +136,20 @@ function load_mailbox(mailbox) {
   .then(response => response.json()) // if doing arrow function, with return one-liner, remove curly braces!
   .then(result => {
     // console.log(result);//also looks like need to refresh browser to see results!
-    result.forEach(add_email)
+    result.forEach(add_email.bind(null, mailbox))
   });
-
+  // console.log(document.querySelectorAll('button'))
   // generate divs for the emails and return them!
   // relevant section in lecture 6: search get new posts and add posts
 
 }
 
-function add_email(contents) {
+function add_email(mailbox, contents) {
   // create a new email
   const email = document.createElement('div')
   // email.innerHTML = contents.subject
   // console.log(contents.sender)
+  // console.log(mailbox)
 
   // depending on the read/unread state, set the className to either
   // read email or
@@ -112,7 +160,7 @@ function add_email(contents) {
     email.className = 'unread email'
   }
   email.innerHTML = `from: ${contents.sender} 
-  - ${contents.subject} | ${contents.timestamp} <button data-email_id=${contents.id} class="open">open</button>`
+  - ${contents.subject} | ${contents.timestamp} <button data-email_id=${contents.id} data-mailbox=${mailbox} class="open">open</button>`
 
   // console.log(email)
 
